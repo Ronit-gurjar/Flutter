@@ -4,8 +4,12 @@
 import 'package:firstapp/todo_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  //intilalize the hive
+  await Hive.initFlutter();
   runApp(MyApp());
 }
 
@@ -53,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(206, 20, 20, 20),
-          title: Center(child: Text("TODO")),
+          title: Center(child: Text("TODO ;-)")),
         ),
         body: Stack(children: [
           Positioned(
@@ -72,11 +76,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Container(
                           margin: const EdgeInsets.only(top: 10, bottom: 10),
-                          /*child: const Text(
-                            "TODO's",
+                          child: const Text(
+                            "ToDo's :-",
                             style: TextStyle(
                                 fontSize: 25, fontWeight: FontWeight.w500),
-                          ),*/
+                          ),
                         ),
                         for (Todo todoo in _foundTodo)
                           TodoItem(
