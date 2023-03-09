@@ -1,15 +1,17 @@
 // ignore_for_file: prefer_const_constructors
 //made by @Ronit-gurjar on github
 
+import 'package:firstapp/todo_data/database.dart';
 import 'package:firstapp/todo_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
-  //intilalize the hive
   await Hive.initFlutter();
+  Hive.registerAdapter(TodoAdapter());
+  //open the box
+  var box = await Hive.openBox('todobox');
   runApp(MyApp());
 }
 
@@ -43,13 +45,33 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final todosList = Todo.todoList();
-  List<Todo> _foundTodo = [];
+  //List<Todo> _foundTodo = [];
   final _todoController = TextEditingController();
+  //reference the hive box
+  final _todobox = Hive.box('todobox');
+  Todo_database db = Todo_database();
 
   @override
   void initState() {
-    _foundTodo = todosList;
-    super.initState();
+    db.foundTodo = todosList;
+
+    //check if app is started for first time. if yes, then create initial data:-
+    if (_todobox.get("TODOLIST") == null) {
+      db.createIntialData();
+    } else {
+      //if data already exist
+      setState(() {
+        db.loadData();
+      });
+      super.initState();
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    Hive.close();
+    super.dispose();
   }
 
   @override
@@ -82,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 fontSize: 25, fontWeight: FontWeight.w500),
                           ),
                         ),
-                        for (Todo todoo in _foundTodo)
+                        for (Todo todoo in db.foundTodo)
                           TodoItem(
                             todo: todoo,
                             ontodoChange: _handletodoChange,
@@ -103,8 +125,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 Expanded(
                     child: Container(
                   margin:
-                      const EdgeInsets.only(bottom: 10, right: 20, left: 20),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      const EdgeInsets.only(bottom: 10, right: 30, left: 30),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     // ignore: prefer_const_literals_to_create_immutables
@@ -150,12 +172,14 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       todo.isDone = !todo.isDone;
     });
+    db.updateDatabse();
   }
 
   void _deletetodoItem(String id) {
     setState(() {
       todosList.removeWhere((item) => item.id == id);
     });
+    db.updateDatabse();
   }
 
   void _addtodoItem(String toDo) {
@@ -164,6 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           todoText: toDo));
     });
+    db.updateDatabse();
     _todoController.clear();
   }
 
@@ -179,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> {
           .toList();
     }
     setState(() {
-      _foundTodo = results;
+      db.foundTodo = results;
     });
   }
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:hive/hive.dart';
+part 'todo_item.g.dart';
 
 class TodoItem extends StatelessWidget {
   final Todo todo;
@@ -57,10 +59,13 @@ class TodoItem extends StatelessWidget {
 }
 
 //models:--
-
-class Todo {
+@HiveType(typeId: 0)
+class Todo extends HiveObject {
+  @HiveField(0)
   String? id;
+  @HiveField(1)
   String? todoText;
+  @HiveField(2)
   bool isDone;
 
   Todo({
